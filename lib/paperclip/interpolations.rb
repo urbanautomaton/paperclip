@@ -27,13 +27,13 @@ module Paperclip
     # and the arguments to pass, which are the attachment and style name.
     # You can pass a method name on your record as a symbol, which should turn
     # an interpolation pattern for Paperclip to use.
-    def self.interpolate pattern, *args
+    def self.interpolate(pattern, *args)
       pattern = args.first.instance.send(pattern) if pattern.kind_of? Symbol
-      all.reverse.inject(pattern) do |result, tag|
-        result.gsub(/:#{tag}/) do |match|
-          send( tag, *args )
-        end
+      result = pattern.dup
+      pattern.scan(/:(\w+)/).flatten do |tag|
+        result.gsub(/:#{tag}/, send(tag, *args)) if respond_to?(tag)
       end
+      result
     end
 
     # Returns the filename, the same way as ":basename.:extension" would.
