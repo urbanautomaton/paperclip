@@ -29,11 +29,10 @@ module Paperclip
     # an interpolation pattern for Paperclip to use.
     def self.interpolate(pattern, *args)
       pattern = args.first.instance.send(pattern) if pattern.kind_of? Symbol
-      result = pattern.dup
-      pattern.scan(/:(\w+)/).flatten do |tag|
-        result.gsub(/:#{tag}/, send(tag, *args)) if respond_to?(tag)
+      pattern.scan(/:(\w+)/).flatten.inject(pattern.dup) do |result, tag|
+        result.gsub!(/:#{tag}/) { send(tag, *args) } if respond_to?(tag)
+        result
       end
-      result
     end
 
     # Returns the filename, the same way as ":basename.:extension" would.
