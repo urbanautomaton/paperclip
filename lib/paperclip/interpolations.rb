@@ -27,11 +27,10 @@ module Paperclip
     # and the arguments to pass, which are the attachment and style name.
     # You can pass a method name on your record as a symbol, which should turn
     # an interpolation pattern for Paperclip to use.
-    def self.interpolate(pattern, *args)
-      pattern = args.first.instance.send(pattern) if pattern.kind_of? Symbol
-      pattern.scan(/:(\w+)/).flatten.inject(pattern.dup) do |result, tag|
-        result.gsub!(/:#{tag}/) { send(tag, *args) } if respond_to?(tag)
-        result
+    def self.interpolate(pattern, attachment, style)
+      pattern = attachment.instance.send(pattern) if pattern.kind_of? Symbol
+      pattern.gsub(/:(\w+)/) do |tag|
+        respond_to?($1) ? send($1, attachment, style) : tag
       end
     end
 
